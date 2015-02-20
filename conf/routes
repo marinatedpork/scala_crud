@@ -1,0 +1,16 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+
+GET         /                         controllers.PhantomController.index
+
+POST        /phantoms/create	 				controllers.PhantomController.create
+GET         /phantoms/:id    	 				controllers.PhantomController.edit(id: String)
+POST        /phantoms/:id/update 			controllers.PhantomController.update(id: String)
+POST        /phantoms/:id/delete 			controllers.PhantomController.delete(id: String)
+
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.at(path="/public", file)

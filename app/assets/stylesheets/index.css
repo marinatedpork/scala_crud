@@ -1,0 +1,21 @@
+* {
+	font-family: Gotham, sans-serif;
+}
+
+li {
+	list-style: none;
+	font-size: 18px;
+}
+
+li:nth-child(even) {
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+a:active, a:visited, a {
+	text-decoration: none;
+}
+
+form {
+	margin-left: 40px;
+}
