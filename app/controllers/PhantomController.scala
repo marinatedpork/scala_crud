@@ -7,12 +7,9 @@ import models._
 import reactivemongo.bson.BSONObjectID
 import scala.concurrent.Future
 
-import scala.util.{Failure, Success}
-
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone.UTC
 
-import play.api.Logger
 import play.api.Play.current
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
@@ -23,18 +20,21 @@ import reactivemongo.core.commands.LastError
 
 object PhantomController extends Controller {
 
+	import Phantom.PhantomBSONAccessor
 	val mongoDriver = new MongoDriver
 	val mongoConnection = mongoDriver.connection(List("localhost"))
-  val mongoDb = mongoConnection("matt")
+	val mongoDb = mongoConnection("matt")
 	val collection : BSONCollection = mongoDb.collection("phantoms")
 
 	def index = Action.async {
-		implicit val reader = Phantom.PhantomBSONReader
-	  val selector = BSONDocument()
-	  val foundPhantoms = collection.find(selector).cursor.collect[List]()
-	  foundPhantoms.map { phantom =>
-	    Ok(views.html.index(phantom))
-	  }
+		val selector = BSONDocument()
+		val foundPhantoms = collection.
+			find(selector).
+			cursor[Phantom].
+			collect[List]()
+		foundPhantoms.map { phantom =>
+			Ok(views.html.index(phantom))
+		}
 	}
 
 	def create = Action { implicit request =>
@@ -46,26 +46,25 @@ object PhantomController extends Controller {
 			whenUpdated  = None,
 			message
 		)
-		collection.insert(Phantom.PhantomBSONWriter.write(phantom))
+		collection.insert(phantom)
 		Redirect(routes.PhantomController.index)
 	}
 
 	def edit(id: String) = Action.async {
-		implicit val reader = Phantom.PhantomBSONReader
-	  val selector = BSONDocument("_id" -> BSONObjectID(id))
-	  val foundPhantom = collection.find(selector).one[Phantom]
-	  foundPhantom.map { phantom => 
-	  	phantom match {
-	  	  case Some(p) => Ok(views.html.edit(p))
-	  	  case None => Redirect(routes.PhantomController.index)
-	  	}
-	  }
+		val selector = BSONDocument("_id" -> BSONObjectID(id))
+		val foundPhantom = collection.find(selector).one[Phantom]
+		foundPhantom.map { phantom => 
+			phantom match {
+				case Some(p) => Ok(views.html.edit(p))
+				case None => Redirect(routes.PhantomController.index)
+			}
+		}
 	}
 
 	def update (id: String) = Action { implicit request =>
 		val params = request.body.asFormUrlEncoded.get
 		val message = params("message")(0).toString
-	  val selector = BSONDocument("_id" -> BSONObjectID(id))
+		val selector = BSONDocument("_id" -> BSONObjectID(id))
 		val modifier = BSONDocument(
 			"$set" -> BSONDocument(
 				"message"        -> message,

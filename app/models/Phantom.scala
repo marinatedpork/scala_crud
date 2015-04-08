@@ -18,7 +18,6 @@ import reactivemongo.api._
 import reactivemongo.bson._
 import reactivemongo.core.commands.LastError
 
-
 /**
 	* A phantom class
 	*
@@ -35,27 +34,24 @@ case class Phantom(
 
 object Phantom {
 
-  implicit object PhantomBSONReader extends BSONDocumentReader[Phantom] {
-    def read(doc: BSONDocument): Phantom = {
-      Phantom(
-        doc.getAs[BSONObjectID]("_id").get,
-        doc.getAs[BSONDateTime]("whenCreated").map(dt => new DateTime(dt.value)),
-        doc.getAs[BSONDateTime]("whenUpdated").map(dt => new DateTime(dt.value)),
-        doc.getAs[BSONString]("message").get.value
-      )
-    }
-  }
-
-  implicit object PhantomBSONWriter extends BSONDocumentWriter[Phantom] {
-    def write(phantom: Phantom) = {
-      val bson = BSONDocument(
-        "_id" -> BSONObjectID.generate,
-        "whenCreated"  -> phantom.whenCreated.map(dt => BSONDateTime(dt.getMillis)),
+	implicit object PhantomBSONAccessor extends BSONDocumentReader[Phantom] with BSONDocumentWriter[Phantom] {
+		def read(doc: BSONDocument): Phantom = {
+			Phantom(
+				doc.getAs[BSONObjectID]("_id").get,
+				doc.getAs[BSONDateTime]("whenCreated").map(dt => new DateTime(dt.value)),
+				doc.getAs[BSONDateTime]("whenUpdated").map(dt => new DateTime(dt.value)),
+				doc.getAs[BSONString]("message").get.value
+			)
+		}
+		def write(phantom: Phantom) = {
+			val bson = BSONDocument(
+				"_id" -> BSONObjectID.generate,
+				"whenCreated"  -> phantom.whenCreated.map(dt => BSONDateTime(dt.getMillis)),
 				"whenUpdated"  -> phantom.whenUpdated.map(dt => BSONDateTime(dt.getMillis)),
-        "message" -> BSONString(phantom.message)
-        )
-      bson
-    }
-  }
-
+				"message" -> BSONString(phantom.message)
+				)
+			bson
+		}
+	}
+	
 }

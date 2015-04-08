@@ -6,8 +6,8 @@
 
 GET         /                         controllers.PhantomController.index
 
-POST        /phantoms/create	 				controllers.PhantomController.create
-GET         /phantoms/:id    	 				controllers.PhantomController.edit(id: String)
+POST        /phantoms/create 			    controllers.PhantomController.create
+GET         /phantoms/:id    	 		    controllers.PhantomController.edit(id: String)
 POST        /phantoms/:id/update 			controllers.PhantomController.update(id: String)
 POST        /phantoms/:id/delete 			controllers.PhantomController.delete(id: String)
 
